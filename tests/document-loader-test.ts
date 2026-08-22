@@ -1,5 +1,5 @@
 import path from "path";
-import { DocumentLoader } from "./../src/loaders/documentLoader";
+import { DocumentLoader } from "../src/loaders/DocumentLoader";
 
 const documentLoader = new DocumentLoader();
 

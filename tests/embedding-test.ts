@@ -1,4 +1,4 @@
-import { EmbeddingService } from "../src/embeddings/embeddingService";
+import { EmbeddingService } from "../src/embeddings/EmbeddingService";
 
 const singleText = "This test sentence is in English";
 const multiLangTexts = [

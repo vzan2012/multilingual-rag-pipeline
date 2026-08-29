@@ -97,7 +97,7 @@ export class VectorStoreService {
   };
 
   deleteCollection = async () => {
-    if (this.collection) throw new Error(`⌛ Collection not initialized`);
+    if (!this.collection) throw new Error(`⌛ Collection not initialized`);
 
     await this.client.deleteCollection({ name: this.collectionName });
 

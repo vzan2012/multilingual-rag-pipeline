@@ -1,6 +1,7 @@
 {
   "name": "multilingual-rag-pipeline",
   "author": "Deepak Guptha Sitharaman",
+  "license": "MIT",
   "version": "1.0.0",
   "module": "index.ts",
   "type": "module",

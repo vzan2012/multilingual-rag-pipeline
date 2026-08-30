@@ -1,6 +1,6 @@
 # multilingual-rag-pipeline
 
-A local, in-process multilingual RAG (Retrieval-Augmented Generation) pipeline. Documents are loaded, chunked, embedded (locally, via `@xenova/transformers`), and stored in ChromaDB for semantic search — then an optional Groq-generated answer is layered on top, all exposed over a REST API built with Elysia.
+A local, in-process multilingual RAG (Retrieval-Augmented Generation) pipeline. Documents are loaded, chunked, embedded (locally, via `@xenova/transformers`), and stored in ChromaDB for semantic search - then an optional Groq-generated answer is layered on top, all exposed over a REST API built with Elysia.
 
 ## Architecture
 
@@ -49,7 +49,7 @@ flowchart TB
     classDef unused fill:#3f1d2b,stroke:#e879a3,color:#fbcfe8,stroke-dasharray: 4 4
 ```
 
-> **Notes:** the Prisma/SQLite schema (`Document`/`DocumentChunk`) exists but isn't wired into the pipeline yet — `VectorStoreService`/ChromaDB is the only persistence layer currently in use. `GroqService` is optional too: without a `GROQ_API_KEY`, `/query` still returns retrieved chunks, just with `answer: null` instead of a generated one.
+> **Notes:** the Prisma/SQLite schema (`Document`/`DocumentChunk`) exists but isn't wired into the pipeline yet - `VectorStoreService`/ChromaDB is the only persistence layer currently in use. `GroqService` is optional too: without a `GROQ_API_KEY`, `/query` still returns retrieved chunks, just with `answer: null` instead of a generated one.
 
 ## Project Structure
 
@@ -85,7 +85,7 @@ multilingual-rag-pipeline/
 └── ⚙️ tsconfig.json
 ```
 
-Not shown above: `node_modules/`, `chroma-data/`, `uploads/`, `generated/prisma/`, and `graphify-out/` — all gitignored, created at runtime or on install rather than checked into the repo.
+Not shown above: `node_modules/`, `chroma-data/`, `uploads/`, `generated/prisma/`, and `graphify-out/` - all gitignored, created at runtime or on install rather than checked into the repo.
 
 ## Getting Started
 
@@ -110,7 +110,7 @@ Copy `.env.sample` to `.env` and fill in real values:
 cp .env.sample .env
 ```
 
-Only `DATABASE_URL` is required out of the box (already set to a local SQLite file). `GROQ_API_KEY` is optional — get a free key at [console.groq.com](https://console.groq.com) if you want generated answers on `/query`; without it, `/query` still returns retrieved chunks, just with `answer: null`.
+Only `DATABASE_URL` is required out of the box (already set to a local SQLite file). `GROQ_API_KEY` is optional - get a free key at [console.groq.com](https://console.groq.com) if you want generated answers on `/query`; without it, `/query` still returns retrieved chunks, just with `answer: null`.
 
 ### 4. Initialize the database with Prisma
 
@@ -119,7 +119,7 @@ bunx prisma generate
 bunx prisma migrate dev
 ```
 
-This generates the Prisma client and applies the SQLite schema (`Document`/`DocumentChunk`). Note: the pipeline itself doesn't read/write through Prisma yet — this step only matters if you're extending it to persist document metadata relationally.
+This generates the Prisma client and applies the SQLite schema (`Document`/`DocumentChunk`). Note: the pipeline itself doesn't read/write through Prisma yet - this step only matters if you're extending it to persist document metadata relationally.
 
 ### 5. Start ChromaDB
 
@@ -162,9 +162,26 @@ curl -X POST http://localhost:3000/documents/upload -F "file=@sample.txt" -F "la
 curl -X POST http://localhost:3000/query -H "Content-Type: application/json" -d '{"query":"what is this document about"}'
 ```
 
-`/documents` only works if `filePath` already points to a file on the same machine the server runs on — it does not accept file bytes. `/documents/upload` is the actual upload path: send the file itself as multipart form-data and the server saves it to `uploads/` (gitignored) before indexing.
+`/documents` only works if `filePath` already points to a file on the same machine the server runs on - it does not accept file bytes. `/documents/upload` is the actual upload path: send the file itself as multipart form-data and the server saves it to `uploads/` (gitignored) before indexing.
 
 This project was created using `bun init` in bun v1.2.23. [Bun](https://bun.com) is a fast all-in-one JavaScript runtime.
+
+## Contributing
+
+Contributions are welcome - see [CONTRIBUTING.md](CONTRIBUTING.md) for local setup, testing, and code style.
+
+## Acknowledgements
+
+- [Claude](https://claude.com) (Anthropic) - used throughout as an AI pair programmer in VS Code
+- [Xenova Transformers](https://github.com/xenova/transformers.js) - runs multilingual embeddings locally, no external API required
+- [ChromaDB](https://www.trychroma.com/) - the vector store
+- [GroqCloud](https://groq.com) - free, fast inference for the answer-generation step
+- [Elysia](https://elysiajs.com/) - the Bun-native REST API framework
+- [Bun](https://bun.com) - runtime and package manager
+
+## License
+
+MIT - see [LICENSE](LICENSE).
 
 ## Author
 

@@ -37,3 +37,6 @@ report.[0-9]_.[0-9]_.[0-9]_.[0-9]_.json
 
 # graphify output (regenerate with `graphify .`)
 graphify-out/
+
+# files uploaded via POST /documents/upload
+uploads/

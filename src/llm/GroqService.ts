@@ -17,7 +17,7 @@ export class GroqService {
   constructor(options: GroqOptions = {}) {
     this.apiKey = options.apiKey || process.env.GROQ_API_KEY || "";
     this.model =
-      options.model || process.env.GROQ_MODEL || "llama-3.3-70b-versatile";
+      options.model || process.env.GROQ_MODEL || "openai/gpt-oss-120b";
 
     if (!this.apiKey)
       throw new Error(

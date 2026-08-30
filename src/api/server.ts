@@ -1,4 +1,4 @@
-import { Elysia } from "elysia";
+import { Elysia, t } from "elysia";
 import { GroqService } from "../llm/GroqService";
 import { EmbeddingService } from "../embeddings/EmbeddingService";
 import { RAGPipeline } from "../pipeline/RAGPipeline";
@@ -63,6 +63,26 @@ export const createServer = async () => {
       const chunks = await pipeline.indexDocument(filePath, language);
       return { indexed: chunks.length, chunks };
     })
+    .post(
+      "/documents/upload",
+      async ({ body }) => {
+        const { file, language } = body;
+
+        // Bun.write creates any missing parent directories, so "uploads/"
+        // doesn't need to exist beforehand.
+        const destPath = `uploads/${Date.now()}-${file.name}`;
+        await Bun.write(destPath, file);
+
+        const chunks = await pipeline.indexDocument(destPath, language);
+        return { indexed: chunks.length, filename: file.name, chunks };
+      },
+      {
+        body: t.Object({
+          file: t.File(),
+          language: t.Optional(t.String()),
+        }),
+      },
+    )
     .post("/query", async ({ body, set }) => {
       const { query, topK } = body as { query: string; topK?: number };
 

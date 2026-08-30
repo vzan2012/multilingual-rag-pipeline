@@ -64,6 +64,42 @@ flowchart TB
 
 > **Notes:** the Prisma/SQLite schema (`Document`/`DocumentChunk`) exists but isn't wired into the pipeline yet — `VectorStoreService`/ChromaDB is the only persistence layer currently in use. `GroqService` is optional too: without a `GROQ_API_KEY`, `/query` still returns retrieved chunks, just with `answer: null` instead of a generated one.
 
+## Project Structure
+
+```
+multilingual-rag-pipeline/
+├── 🚀 index.ts                      # entrypoint - starts the REST API (createServer().listen())
+├── 🐳 docker-compose.yml            # ChromaDB container definition
+├── 🔑 .env.sample                   # every configurable env var, documented - copy to .env
+│
+├── 📁 src/
+│   ├── 📁 api/
+│   │   └── 📄 server.ts             # Elysia app: GET /health, POST /documents, POST /documents/upload, POST /query
+│   ├── 📁 pipeline/
+│   │   └── 📄 RAGPipeline.ts        # orchestrates load -> chunk -> embed -> store -> query -> answer
+│   ├── 📁 loaders/
+│   │   ├── 📄 DocumentLoader.ts     # .txt / .pdf / .docx -> raw text + metadata
+│   │   └── 📄 TextChunker.ts        # sentence-aware chunking with overlap
+│   ├── 📁 embeddings/
+│   │   └── 📄 EmbeddingService.ts   # local multilingual embeddings via @xenova/transformers
+│   ├── 📁 vectorstore/
+│   │   └── 📄 VectorStoreService.ts # ChromaDB client wrapper
+│   ├── 📁 llm/
+│   │   └── 📄 GroqService.ts        # GroqCloud chat completion client (answer generation)
+│   └── 📁 types/                    # shared types - see CLAUDE.md, not all are re-exported from index.ts
+│
+├── 🧪 tests/                        # standalone smoke-test scripts, no test framework - run individually with bun
+├── 📁 prisma/
+│   └── 📝 schema.prisma             # Document/DocumentChunk models - not yet wired into the pipeline
+├── 📁 seed/
+│   └── 🗄️ dev.db                    # SQLite file (Prisma datasource)
+│
+├── ⚙️ package.json
+└── ⚙️ tsconfig.json
+```
+
+Not shown above: `node_modules/`, `chroma-data/`, `uploads/`, `generated/prisma/`, and `graphify-out/` — all gitignored, created at runtime or on install rather than checked into the repo.
+
 ## Getting Started
 
 ### 1. Clone the repository

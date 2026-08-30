@@ -1,6 +1,6 @@
 # multilingual-rag-pipeline
 
-A local, in-process multilingual RAG (Retrieval-Augmented Generation) pipeline. Documents are loaded, chunked, embedded (locally, via `@xenova/transformers`), and stored in ChromaDB for semantic search - then an optional Groq-generated answer is layered on top, all exposed over a REST API built with Elysia.
+A local, in-process multilingual RAG (Retrieval-Augmented Generation) pipeline, written in **TypeScript** and run on **Bun**. Documents in any supported language (tested with English and Spanish) are loaded, chunked, embedded (locally, via `@xenova/transformers`), and stored in ChromaDB for semantic search - then an optional Groq-generated answer is layered on top, all exposed over a REST API built with Elysia.
 
 ## Architecture
 

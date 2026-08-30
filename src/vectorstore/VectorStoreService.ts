@@ -1,4 +1,4 @@
-import { ChromaClient, type Collection } from "chromadb";
+import { ChromaClient, type Collection, type EmbeddingFunction } from "chromadb";
 import type { VectorStoreConfig } from "../types/VectorStore";
 import type { DocumentChunk } from "../types";
 
@@ -14,6 +14,17 @@ export class VectorStoreService {
   private collection: Collection | null = null;
   private collectionName: string;
   private readonly BATCH_SIZE = 100;
+  // This service always supplies embeddings explicitly (see addChunks/search
+  // below via EmbeddingService), so Chroma's own embedding function is never
+  // actually invoked. This stub skips Chroma's attempt to instantiate its
+  // DefaultEmbeddingFunction, which needs the optional @chroma-core/default-embed package.
+  private embeddingFunction: EmbeddingFunction = {
+    generate: async () => {
+      throw new Error(
+        "VectorStoreService always provides embeddings explicitly - Chroma's own embedding function should never be invoked.",
+      );
+    },
+  };
 
   constructor(config: VectorStoreConfig) {
     this.client = new ChromaClient({
@@ -28,6 +39,7 @@ export class VectorStoreService {
     try {
       this.collection = await this.client.getCollection({
         name: this.collectionName,
+        embeddingFunction: this.embeddingFunction,
       });
       console.log(
         `✅ Connected to existing collection: ${this.collectionName}`,
@@ -35,6 +47,7 @@ export class VectorStoreService {
     } catch (error) {
       this.collection = await this.client.createCollection({
         name: this.collectionName,
+        embeddingFunction: this.embeddingFunction,
       });
       console.log(
         `✅ Connected to existing collection: ${this.collectionName}`,

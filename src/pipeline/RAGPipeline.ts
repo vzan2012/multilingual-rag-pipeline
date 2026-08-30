@@ -1,4 +1,5 @@
 import type { EmbeddingService } from "../embeddings/EmbeddingService";
+import type { GroqService } from "../llm/GroqService";
 import { DocumentLoader } from "../loaders/DocumentLoader";
 import { TextChunker } from "../loaders/TextChunker";
 import type { DocumentChunk, SearchResult } from "../types";
@@ -10,17 +11,20 @@ export class RAGPipeline {
   private chunker: TextChunker;
   private embeddingService: EmbeddingService;
   private vectorStoreService: VectorStoreService;
+  private groqService?: GroqService;
   private topK: number;
 
   constructor(
     embeddingService: EmbeddingService,
     vectorStoreService: VectorStoreService,
     config: RAGPipelineConfig = {},
+    groqService?: GroqService,
   ) {
     this.loader = new DocumentLoader();
     this.chunker = new TextChunker();
     this.embeddingService = embeddingService;
     this.vectorStoreService = vectorStoreService;
+    this.groqService = groqService;
     this.topK = config.topK || 5;
   }
 
@@ -157,4 +161,45 @@ export class RAGPipeline {
    * @returns {unknown}
    */
   getStats = async () => await this.vectorStoreService.getStats();
+
+  /**
+   * Query the RAG pipeline and generate a natural-language answer from the
+   * retrieved chunks. Requires a GroqService to have been passed to the constructor.
+   *
+   * @async
+   * @param {string} query
+   * @param {?number} [topK]
+   * @returns {Promise<{
+   *     answer: string;
+   *     sources: SearchResult[];
+   *     queryTime: number;
+   *   }>}
+   */
+  queryWithAnswer = async (
+    query: string,
+    topK?: number,
+  ): Promise<{
+    answer: string;
+    sources: SearchResult[];
+    queryTime: number;
+  }> => {
+    if (!this.groqService)
+      throw new Error(
+        "queryWithAnswer requires a GroqService - pass one to the RAGPipeline constructor",
+      );
+
+    const startTime = Date.now();
+    const { results } = await this.query(query, topK);
+
+    const answer = await this.groqService.generateAnswer(
+      query,
+      results.map((r) => r.content),
+    );
+
+    return {
+      answer,
+      sources: results,
+      queryTime: Date.now() - startTime,
+    };
+  };
 }

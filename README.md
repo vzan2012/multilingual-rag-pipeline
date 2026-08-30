@@ -6,38 +6,25 @@ A local, in-process multilingual RAG (Retrieval-Augmented Generation) pipeline. 
 
 ```mermaid
 flowchart TB
-    subgraph API["REST API - src/api/server.ts"]
-        API1["POST /documents<br/>(existing file path)"]
-        API4["POST /documents/upload<br/>(real file upload)"]
-        API2["POST /query"]
-        API3["GET /health"]
-    end
+    API1["POST /documents<br/>existing file path"] --> A
+    API4["POST /documents/upload<br/>real file upload, saved to uploads/"] --> A
+    API2["POST /query"] --> Q
+    API3["GET /health"] --> E
 
-    subgraph Indexing["Indexing: RAGPipeline.indexDocument"]
-        A["Document file<br/>.txt / .pdf / .docx"] --> B["DocumentLoader<br/>src/loaders/DocumentLoader.ts"]
-        B -->|"raw text + metadata"| C["TextChunker<br/>src/loaders/TextChunker.ts"]
-    end
-
-    subgraph Querying["Querying: RAGPipeline.query / queryWithAnswer"]
-        Q["User query string"]
-    end
-
-    API1 --> A
-    API4 -->|"saved to uploads/"| A
-    API2 --> Q
-    API3 -.->|"getStats()"| E
-
+    A["Document file<br/>.txt / .pdf / .docx"] --> B["DocumentLoader<br/>src/loaders/DocumentLoader.ts"]
+    B -->|"raw text + metadata"| C["TextChunker<br/>src/loaders/TextChunker.ts"]
     C -->|"DocumentChunk array<br/>sentence-aware, overlapping"| D
-    Q --> D["EmbeddingService<br/>src/embeddings/EmbeddingService.ts<br/>Xenova/paraphrase-multilingual-MiniLM-L12-v2"]
+
+    Q["User query string"] --> D["EmbeddingService<br/>src/embeddings/EmbeddingService.ts<br/>Xenova/paraphrase-multilingual-MiniLM-L12-v2"]
 
     D -->|"embeddings, local in-process"| E["VectorStoreService<br/>src/vectorstore/VectorStoreService.ts"]
-    E <-->|"addChunks / search"| F[("ChromaDB<br/>localhost:8000, docker-compose")]
+    E -->|"addChunks / search"| F[("ChromaDB<br/>localhost:8000, docker-compose")]
     F -->|"ids, documents,<br/>metadatas, distances"| G["SearchResult array<br/>score = 1 - distance"]
 
     G --> H["GroqService (optional)<br/>src/llm/GroqService.ts<br/>free API - console.groq.com"]
     H --> I["Answer string<br/>queryWithAnswer()"]
 
-    P["Prisma / SQLite<br/>prisma/schema.prisma<br/>Document, DocumentChunk"]
+    P["Prisma / SQLite (unused)<br/>prisma/schema.prisma<br/>Document, DocumentChunk"]
 
     class API1,API2,API3,API4 api
     class A,Q input
